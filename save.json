@@ -1,0 +1,17 @@
+{
+  "PageStatus": "ON",
+  "Enabled": "ON",
+  "Password": "123",
+  "SoftwareName": "aaa",
+  "ZIPName": "123.zip",
+  "GEO": "100",
+  "BlockedGEO": "AZ",
+  "FileName": "12312",
+  "OS": [
+    "Windows",
+    "Android",
+    "MacOS"
+  ],
+  "PatchDownloadLinks": "https://dl.google.com/chrome/install/standalonesetup64.exe",
+  "Version": "V3"
+}
