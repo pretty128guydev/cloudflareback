@@ -1,8 +1,26 @@
 [
-    {
-        "url": "http://192.168.11.57",
-        "date": "2024-10-15 7:13:52 UTC",
-        "who": "Admin",
-        "reset": 0
-    }
+  {
+    "url": "http://localhost",
+    "date": "2024-10-15 7:13:52 UTC",
+    "who": "Admin",
+    "reset": 0
+  },
+  {
+    "url": "https://kickgoal.shop",
+    "date": "2024-10-16 4:32:9 UTC",
+    "who": "Admin",
+    "reset": 1
+  },
+  {
+    "url": "https://elitestriker.site",
+    "date": "2024-10-16 4:32:33 UTC",
+    "who": "User_A",
+    "reset": 0
+  },
+  {
+    "url": "http://wddww.com",
+    "date": "2024-10-16 5:2:43 UTC",
+    "who": "Admin",
+    "reset": 0
+  }
 ]

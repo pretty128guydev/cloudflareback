@@ -28,7 +28,7 @@ const hashPassword = async (password) => {
 // Function to read users from CSV and validate login
 app.post('/api/login', (req, res) => {
     const { passkey } = req.body;
-    console.log(passkey);
+    
     if (!passkey) {
         return res.status(400).json({ message: 'Passkey is required' });
     }
