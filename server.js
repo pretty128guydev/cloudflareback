@@ -222,10 +222,13 @@ async function getDataFromURLs(site) {
                 : '--';
         tmpData.countryCode = getCountryCodeAndCount(res_data)[0]?.country;
         tmpData.downloadCount = getCountryCodeAndCount(res_data)[0]?.count;
+        tmpData.visitorCount = getCountryCodeAndCount(res_data)[0]?.visit;
         tmpData.countryCode1 = getCountryCodeAndCount(res_data)[1]?.country;
         tmpData.downloadCount1 = getCountryCodeAndCount(res_data)[1]?.count;
+        tmpData.visitorCount1 = getCountryCodeAndCount(res_data)[1]?.visit;
         tmpData.countryCode2 = getCountryCodeAndCount(res_data)[2]?.country;
         tmpData.downloadCount2 = getCountryCodeAndCount(res_data)[2]?.count;
+        tmpData.visitorCount2 = getCountryCodeAndCount(res_data)[2]?.visit;
         tmpData.isLive = true;
         tmpData.isReset = site.reset;
         tmpData.who = site.who;
@@ -268,12 +271,15 @@ const getCountryCodeAndCount = (data) => {
     let final = [];
     for (const el of country) {
         let count = 0;
+        let countVisit = 0;
         for (const all of data) {
             if (el == all.country_code && all.isDownload == 'Downloaded') count ++;
+            if (el == all.country_code && all.isDownload != 'Downloaded') countVisit++;
         }
         final.push({
             country: el,
-            count: count
+            count: count,
+            visit: countVisit
         })
     }
 
@@ -655,16 +661,25 @@ app.post('/api/allVersions', (req, res) => {
         let version1 = 0;
         let version2 = 0;
         let version3 = 0;
+        let visitor1 = 0;
+        let visitor2 = 0;
+        let visitor3 = 0;
 		for (const j of readyAllData) {
             if (j.isDownload == 'Downloaded' && j.version == 'V1') version1++;
             if (j.isDownload == 'Downloaded' && j.version == 'V2') version2++;
             if (j.isDownload == 'Downloaded' && j.version == 'V3') version3++;
+            if (j.isDownload !== 'Downloaded' && j.version == 'V1') visitor1++;
+            if (j.isDownload !== 'Downloaded' && j.version == 'V2') visitor2++;
+            if (j.isDownload !== 'Downloaded' && j.version == 'V3') visitor3++;
         }
 
 		result.push({
             version1: version1,
             version2: version2,
-            version3: version3
+            version3: version3,
+            visitor1: visitor1,
+            visitor2: visitor2,
+            visitor3: visitor3
 		})
 
 	res.json(result);
