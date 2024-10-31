@@ -102,7 +102,7 @@ function setDataFromURLs() {
         const jsonData = JSON.parse(data);
 
         ready_chartData = [];
-        
+
         const promises = jsonData.map((site) => {
             return new Promise((resolve) => {
                 linkCheck(`${site.url}`, async function (err, result) {
@@ -218,8 +218,8 @@ async function getDataFromURLs(site) {
         tmpData.visitors = res_data.length;
         tmpData.totalDownloads = res_data.filter((el) => el.isDownload === 'Downloaded').length;
         tmpData.lastDownload = res_data.filter((el) => el.isDownload === 'Downloaded').length > 0
-                ? res_data.reverse().filter((el) => el.isDownload === 'Downloaded')[0].date
-                : '--';
+            ? res_data.reverse().filter((el) => el.isDownload === 'Downloaded')[0].date
+            : '--';
         tmpData.countryCode = getCountryCodeAndCount(res_data)[0]?.country;
         tmpData.downloadCount = getCountryCodeAndCount(res_data)[0]?.count;
         tmpData.visitorCount = getCountryCodeAndCount(res_data)[0]?.visit;
@@ -232,9 +232,8 @@ async function getDataFromURLs(site) {
         tmpData.isLive = true;
         tmpData.isReset = site.reset;
         tmpData.who = site.who;
-        tmpData.date = site.date;
         tmpData.visitCount = res_data.length;
-        
+
         ready_chartData.push(res_data);
 
         return tmpData;
@@ -272,27 +271,30 @@ const getCountryCodeAndCount = (data) => {
     for (const el of country) {
         let count = 0;
         let countVisit = 0;
+        let visit = 0;
         for (const all of data) {
-            if (el == all.country_code && all.isDownload == 'Downloaded') count ++;
+            if (el == all.country_code && all.isDownload == 'Downloaded') count++;
             if (el == all.country_code && all.isDownload != 'Downloaded') countVisit++;
+            if (el == all.country_code) visit++;
         }
         final.push({
             country: el,
             count: count,
-            visit: countVisit
+            visit: countVisit,
+            total: visit
         })
     }
 
     for (let i = 0; i < final.length; i++) {
         for (let j = 0; j < final.length; j++) {
-            if (final[i].count > final[j].count) {
+            if (final[i].total > final[j].total) {
                 const c = final[i];
                 final[i] = final[j];
                 final[j] = c;
             }
         }
     }
-    
+
     return final;
 };
 
@@ -325,127 +327,127 @@ app.post('/api/get_chartData', (req, res) => {
     })
 
     readyAllData.map(i => {
-		let count = 0;
-		readyCountry.map(j => {
-			if (i.country_code == j.country) count++;
-		})
-		if (count == 0) {
-			readyCountry.push({
-				country: i.country_code,
-				data: []
-			})
-		}
-	})
+        let count = 0;
+        readyCountry.map(j => {
+            if (i.country_code == j.country) count++;
+        })
+        if (count == 0) {
+            readyCountry.push({
+                country: i.country_code,
+                data: []
+            })
+        }
+    })
 
     switch (demo_req.mark) {
-		case "day":
+        case "day":
 
-				// when day
-				const everyday = getDatesInRange(demo_req.day_from, demo_req.day_to);
+            // when day
+            const everyday = getDatesInRange(demo_req.day_from, demo_req.day_to);
 
-				for (const day of everyday) {
-					for (const country of readyCountry) {
-						let count = 0;
-						for (const data of readyAllData) {
-							if (country.country == data.country_code && day == data.date.split(' ')[0] && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version)) count++;
-						}
+            for (const day of everyday) {
+                for (const country of readyCountry) {
+                    let count = 0;
+                    for (const data of readyAllData) {
+                        if (country.country == data.country_code && day == data.date.split(' ')[0] && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version)) count++;
+                    }
 
-						readyCountry.map(el => {
-							if (el.country == country.country) el.data.push(count);
-						})
-					}
-				}
+                    readyCountry.map(el => {
+                        if (el.country == country.country) el.data.push(count);
+                    })
+                }
+            }
 
-				const resultDay = {
-					mainData: readyCountry,
-					date: everyday
-				}
+            const resultDay = {
+                mainData: readyCountry,
+                date: everyday
+            }
 
-                let countryFilter = [];
-                resultDay.mainData.map(el => {
-                    if (demo_req.country.includes(el.country)) countryFilter.push(el);
-                })
+            let countryFilter = [];
+            resultDay.mainData.map(el => {
+                if (demo_req.country.includes(el.country)) countryFilter.push(el);
+            })
 
-                resultDay.mainData = countryFilter;
+            resultDay.mainData = countryFilter;
 
-				res.json(resultDay);
+            res.json(resultDay);
 
-			break;
+            break;
 
-		case "month":
+        case "month":
 
-				// when month
-				const everymonth = getMonthlyDatesInRange(demo_req.month_from, demo_req.month_to);
+            // when month
+            const everymonth = getMonthlyDatesInRange(demo_req.month_from, demo_req.month_to);
 
-				for (const month of everymonth) {
-					for (const country of readyCountry) {
-						let count = 0;
-						for (const data of readyAllData) {
-							const isMonth = isDateInMonth(data.date, month);
-							if (isMonth && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version) && country.country == data.country_code) count++; 
-						}
+            for (const month of everymonth) {
+                for (const country of readyCountry) {
+                    let count = 0;
+                    for (const data of readyAllData) {
+                        const isMonth = isDateInMonth(data.date, month);
+                        if (isMonth && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version) && country.country == data.country_code) count++;
+                    }
 
-						readyCountry.map(el => {
-							if (el.country == country.country) el.data.push(count);
-						})
-					}
-				}
+                    readyCountry.map(el => {
+                        if (el.country == country.country) el.data.push(count);
+                    })
+                }
+            }
 
-				const resultMonth = {
-					mainData: readyCountry,
-					date: everymonth
-				}
+            const resultMonth = {
+                mainData: readyCountry,
+                date: everymonth
+            }
 
-                let countryFilter_month = [];
-                resultMonth.mainData.map(el => {
-                    if (demo_req.country.includes(el.country)) countryFilter_month.push(el);
-                })
+            let countryFilter_month = [];
+            resultMonth.mainData.map(el => {
+                if (demo_req.country.includes(el.country)) countryFilter_month.push(el);
+            })
 
-                resultMonth.mainData = countryFilter_month;
+            resultMonth.mainData = countryFilter_month;
 
-				res.json(resultMonth);
+            res.json(resultMonth);
 
-			break;
+            break;
 
-		case "week":
+        case "week":
 
-				// when week
-				const everyweek = getWeeksInRange(demo_req.week_from, demo_req.week_to);
-				
-				for (const week of everyweek) {
-					for (const country of readyCountry) {
-						let count = 0;
-						for (const data of readyAllData) {
-							const isWeek = isDateInISOWeek(data.date, week);
-							if (isWeek && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version) && country.country == data.country_code) count++;
-						}
+            // when week
+            const everyweek = getWeeksInRange(demo_req.week_from, demo_req.week_to);
 
-						readyCountry.map(el => {
-							if (el.country == country.country) el.data.push(count);
-						})
-					}
-				}
+            for (const week of everyweek) {
+                for (const country of readyCountry) {
+                    let count = 0;
+                    for (const data of readyAllData) {
+                        const isWeek = isDateInISOWeek(data.date, week);
+                        if (isWeek && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version) && country.country == data.country_code) count++;
+                    }
 
-				const resultWeek = {
-					mainData: readyCountry,
-					date: everyweek
-				}
+                    readyCountry.map(el => {
+                        if (el.country == country.country) el.data.push(count);
+                    })
+                }
+            }
 
-                let countryFilter_week = [];
-                resultWeek.mainData.map(el => {
-                    if (demo_req.country.includes(el.country)) countryFilter_week.push(el);
-                })
+            const resultWeek = {
+                mainData: readyCountry,
+                date: everyweek
+            }
 
-                resultWeek.mainData = countryFilter_week;
+            let countryFilter_week = [];
+            resultWeek.mainData.map(el => {
+                if (demo_req.country.includes(el.country)) countryFilter_week.push(el);
+            })
 
-				res.json(resultWeek);
+            resultWeek.mainData = countryFilter_week;
 
-			break;
+            res.json(resultWeek);
 
-		default:
-			break;
-	}
-	
+            break;
+
+        default:
+            break;
+    }
+
 
 })
 
@@ -461,14 +463,14 @@ function getISOWeek(dateString) {
     const weekNumber = Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
     // ISO format: "YYYY-W##"
     return `${date.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
-  }
-  
+}
+
 function getYearMonth(dateString) {
     const date = new Date(dateString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');  // Months are 0-indexed
     return `${year}-${month}`;
-  }
+}
 
 function getDatesInRange(startDate, endDate) {
     const start = new Date(startDate);
@@ -510,7 +512,7 @@ function isDateInMonth(dateString, monthString) {
 
 function getWeeksInRange(startWeek, endWeek) {
     const weeks = [];
-    
+
     // Parse year and week number from start and end inputs
     let [startYear, startWeekNum] = startWeek.split("-W").map(Number);
     const [endYear, endWeekNum] = endWeek.split("-W").map(Number);
@@ -518,7 +520,7 @@ function getWeeksInRange(startWeek, endWeek) {
     // Iterate through each week from start to end
     while (startYear < endYear || (startYear === endYear && startWeekNum <= endWeekNum)) {
         weeks.push(`${startYear}-W${String(startWeekNum).padStart(2, '0')}`);
-        
+
         // Increment week, roll over to next year if necessary
         startWeekNum++;
         if (startWeekNum > 52) {
@@ -538,7 +540,7 @@ function isDateInISOWeek(dateString, weekString) {
 
     // Adjust the date to Thursday of the same week to align with ISO week rules
     date.setUTCDate(date.getUTCDate() + 3 - ((date.getUTCDay() + 6) % 7));
-    
+
     // Get the ISO week year
     const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
     const weekNumber = Math.ceil(((date - yearStart) / (7 * 24 * 60 * 60 * 1000)) + 1);
@@ -552,15 +554,15 @@ function isDateInISOWeek(dateString, weekString) {
 app.post('/api/allCount', (req, res) => {
     const readyAllData = [];
     let readyCountry = [];
-	let result = [];
+    let result = [];
 
     const dateType = req.body.type;
     const day = getCurrentDate();
     const week = getCurrentWeek();
     const month = getCurrentMonth();
 
-    
-    switch(dateType) {
+
+    switch (dateType) {
         case "all":
             chartData.map(el => {
                 el.map(item => readyAllData.push(item));
@@ -593,38 +595,38 @@ app.post('/api/allCount', (req, res) => {
 
 
     readyAllData.map(el => {
-		if (!readyCountry.includes(el.country_code)) readyCountry.push(el.country_code);
-	})
+        if (!readyCountry.includes(el.country_code)) readyCountry.push(el.country_code);
+    })
 
-	for (const i of readyCountry) {
-		let count = 0;
+    for (const i of readyCountry) {
+        let count = 0;
         let visitorCount = 0;
-		for (const j of readyAllData) {
-			if (i == j.country_code && j.isDownload == 'Downloaded') count++;
-			if (i == j.country_code && j.isDownload != 'Downloaded') visitorCount++;
-		}
+        for (const j of readyAllData) {
+            if (i == j.country_code && j.isDownload == 'Downloaded') count++;
+            if (i == j.country_code && j.isDownload != 'Downloaded') visitorCount++;
+        }
 
-		result.push({
-			countryCode: i,
-			downloadCount: count,
+        result.push({
+            countryCode: i,
+            downloadCount: count,
             visitorCount: visitorCount,
-		})
-	}
+        })
+    }
 
-	res.json(result);
+    res.json(result);
 })
 
 // Function to get data for all count
 app.post('/api/allVersions', (req, res) => {
     const readyAllData = [];
-	let result = [];
+    let result = [];
 
     const dateType = req.body.type;
     const day = getCurrentDate();
     const week = getCurrentWeek();
     const month = getCurrentMonth();
 
-    switch(dateType) {
+    switch (dateType) {
         case "all":
             chartData.map(el => {
                 el.map(item => readyAllData.push(item));
@@ -658,37 +660,37 @@ app.post('/api/allVersions', (req, res) => {
 
 
 
-        let version1 = 0;
-        let version2 = 0;
-        let version3 = 0;
-        let visitor1 = 0;
-        let visitor2 = 0;
-        let visitor3 = 0;
-		for (const j of readyAllData) {
-            if (j.isDownload == 'Downloaded' && j.version == 'V1') version1++;
-            if (j.isDownload == 'Downloaded' && j.version == 'V2') version2++;
-            if (j.isDownload == 'Downloaded' && j.version == 'V3') version3++;
-            if (j.isDownload !== 'Downloaded' && j.version == 'V1') visitor1++;
-            if (j.isDownload !== 'Downloaded' && j.version == 'V2') visitor2++;
-            if (j.isDownload !== 'Downloaded' && j.version == 'V3') visitor3++;
-        }
+    let version1 = 0;
+    let version2 = 0;
+    let version3 = 0;
+    let visitor1 = 0;
+    let visitor2 = 0;
+    let visitor3 = 0;
+    for (const j of readyAllData) {
+        if (j.isDownload == 'Downloaded' && j.version == 'V1') version1++;
+        if (j.isDownload == 'Downloaded' && j.version == 'V2') version2++;
+        if (j.isDownload == 'Downloaded' && j.version == 'V3') version3++;
+        if (j.isDownload !== 'Downloaded' && j.version == 'V1') visitor1++;
+        if (j.isDownload !== 'Downloaded' && j.version == 'V2') visitor2++;
+        if (j.isDownload !== 'Downloaded' && j.version == 'V3') visitor3++;
+    }
 
-		result.push({
-            version1: version1,
-            version2: version2,
-            version3: version3,
-            visitor1: visitor1,
-            visitor2: visitor2,
-            visitor3: visitor3
-		})
+    result.push({
+        version1: version1,
+        version2: version2,
+        version3: version3,
+        visitor1: visitor1,
+        visitor2: visitor2,
+        visitor3: visitor3
+    })
 
-	res.json(result);
+    res.json(result);
 })
 
 
 // Function to get country's download order
 app.post('/api/getCountryOrder', (req, res) => {
-    
+
     fs.readFile('domain.json', 'utf8', async (err, data) => {
         if (err) {
             console.error('Error reading file', err);
@@ -702,16 +704,16 @@ app.post('/api/getCountryOrder', (req, res) => {
             if (el.url.includes(req.body.domain)) site = el.url;
         })
 
-        const response = await getDataFromURLs({url: site});
+        const response = await getDataFromURLs({ url: site });
         const resData = {
-            first: { country: response.countryCode, download: response.downloadCount },
-            second: { country: response.countryCode1, download: response.downloadCount1 },
-            third: { country: response.countryCode2, download: response.downloadCount2 }
+            first: { country: response.countryCode, download: response.downloadCount, visitor: response.visitorCount },
+            second: { country: response.countryCode1, download: response.downloadCount1, visitor: response.visitorCount1 },
+            third: { country: response.countryCode2, download: response.downloadCount2, visitor: response.visitorCount2 }
         }
 
         res.json(resData);
     });
-    
+
 })
 
 // Function to read users from CSV and validate login
@@ -1039,7 +1041,7 @@ app.post('/api/getOne', (req, res) => {
 
         jsonData.map(el => {
             if (el.url.toLowerCase().includes(req.body.domain)) {
-                res.json({url: el.url, who: el.who});
+                res.json({ url: el.url, who: el.who });
             }
         })
     });
@@ -1053,28 +1055,70 @@ app.post('/api/getTop10Country', (req, res) => {
     const day = getCurrentDate();
     const week = getCurrentWeek();
     const month = getCurrentMonth();
-    
+
     let ownData = [];
 
-    switch(dateType) {
+    const analyzeDataDemo = analyzeData.filter(item => item.visitCount);
+
+    switch (dateType) {
         case "all":
-            analyzeData.map(el => {
-                if (el.visitCount) ownData.push(el);
+            analyzeDataDemo.map((i, index) => {
+                let visitor = 0;
+                let download = 0;
+                chartData[index].map(j => {
+                    visitor++;
+                    if (j.isDownload == 'Downloaded') download++;
+                })
+                ownData.push({
+                    url: i.url,
+                    visitors: visitor,
+                    totalDownloads: download
+                })
             })
             break;
         case "day":
-            analyzeData.map(el => {
-                if (el.visitCount && el.date?.split(' ')[0] == day) ownData.push(el);
+            analyzeDataDemo.map((i, index) => {
+                let visitor = 0;
+                let download = 0;
+                chartData[index].map(j => {
+                    if (j.date?.split(' ')[0] == day) visitor++;
+                    if (j.isDownload == 'Downloaded' && j.date?.split(' ')[0] == day) download++;
+                })
+                ownData.push({
+                    url: i.url,
+                    visitors: visitor,
+                    totalDownloads: download
+                })
             })
             break;
         case "month":
-            analyzeData.map(el => {
-                if (el.visitCount && isDateInMonth(el.date?.split(' ')[0], month)) ownData.push(el);
+            analyzeDataDemo.map((i, index) => {
+                let visitor = 0;
+                let download = 0;
+                chartData[index].map(j => {
+                    if (isDateInMonth(j.date?.split(' ')[0], month)) visitor++;
+                    if (j.isDownload == 'Downloaded' && isDateInMonth(j.date?.split(' ')[0], month)) download++;
+                })
+                ownData.push({
+                    url: i.url,
+                    visitors: visitor,
+                    totalDownloads: download
+                })
             })
             break;
         case "week":
-            analyzeData.map(el => {
-                if (el.visitCount && isDateInISOWeek(el.date?.split(' ')[0], week)) ownData.push(el);
+            analyzeDataDemo.map((i, index) => {
+                let visitor = 0;
+                let download = 0;
+                chartData[index].map(j => {
+                    if (isDateInISOWeek(j.date?.split(' ')[0], week)) visitor++;
+                    if (j.isDownload == 'Downloaded' && isDateInISOWeek(j.date?.split(' ')[0], week)) download++;
+                })
+                ownData.push({
+                    url: i.url,
+                    visitors: visitor,
+                    totalDownloads: download
+                })
             })
             break;
         default:
@@ -1084,7 +1128,7 @@ app.post('/api/getTop10Country', (req, res) => {
 
     for (let i = 0; i < ownData.length; i++) {
         for (let j = 0; j > ownData; j++) {
-            if (ownData[i].visitCount > ownData[j].visitCount) {
+            if (ownData[i].visitCount < ownData[j].visitCount) {
                 const C = ownData[i];
                 ownData[i] = ownData[j];
                 ownData[j] = C;
@@ -1142,26 +1186,26 @@ function getCurrentWeek() {
     function getISOWeekNumber(date) {
         // Copy date to avoid modifying the original
         const current = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    
+
         // Set to nearest Thursday: current date + 4 - current day number
         current.setUTCDate(current.getUTCDate() + 4 - (current.getUTCDay() || 7));
-    
+
         // First day of the year
         const startOfYear = new Date(Date.UTC(current.getUTCFullYear(), 0, 1));
-    
+
         // Calculate full weeks to nearest Thursday
         const weekNumber = Math.ceil(((current - startOfYear) / 86400000 + 1) / 7);
-    
+
         return weekNumber;
     }
-    
+
     function getISOWeekString() {
         const date = new Date();
         const year = date.getFullYear();
         const week = getISOWeekNumber(date);
         return `${year}-W${String(week).padStart(2, '0')}`;
     }
-    
+
     return getISOWeekString();
 }
 
