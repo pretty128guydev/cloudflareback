@@ -233,6 +233,7 @@ async function getDataFromURLs(site) {
         tmpData.isReset = site.reset;
         tmpData.who = site.who;
         tmpData.visitCount = res_data.length;
+        tmpData.all = res_data;
 
         ready_chartData.push(res_data);
 
@@ -305,151 +306,151 @@ app.get('/api/get_result', (req, res) => {
 })
 
 // Function to get data for chart
-app.post('/api/get_chartData', (req, res) => {
+// app.post('/api/get_chartData', (req, res) => {
 
-    const demo_req = {
-        mark: req.body.mark,
-        month_from: getYearMonth(req.body.day_from),
-        month_to: getYearMonth(req.body.day_to),
-        week_from: getISOWeek(req.body.day_from),
-        week_to: getISOWeek(req.body.day_to),
-        day_from: req.body.day_from,
-        day_to: req.body.day_to,
-        version: req.body.version,
-        country: req.body.country
-    }
+//     const demo_req = {
+//         mark: req.body.mark,
+//         month_from: getYearMonth(req.body.day_from),
+//         month_to: getYearMonth(req.body.day_to),
+//         week_from: getISOWeek(req.body.day_from),
+//         week_to: getISOWeek(req.body.day_to),
+//         day_from: req.body.day_from,
+//         day_to: req.body.day_to,
+//         version: req.body.version,
+//         country: req.body.country
+//     }
 
-    const readyAllData = [];
-    let readyCountry = [];
+//     const readyAllData = [];
+//     let readyCountry = [];
 
-    chartData.map(el => {
-        el.map(item => readyAllData.push(item));
-    })
+//     chartData.map(el => {
+//         el.map(item => readyAllData.push(item));
+//     })
 
-    readyAllData.map(i => {
-        let count = 0;
-        readyCountry.map(j => {
-            if (i.country_code == j.country) count++;
-        })
-        if (count == 0) {
-            readyCountry.push({
-                country: i.country_code,
-                data: []
-            })
-        }
-    })
+//     readyAllData.map(i => {
+//         let count = 0;
+//         readyCountry.map(j => {
+//             if (i.country_code == j.country) count++;
+//         })
+//         if (count == 0) {
+//             readyCountry.push({
+//                 country: i.country_code,
+//                 data: []
+//             })
+//         }
+//     })
 
-    switch (demo_req.mark) {
-        case "day":
+//     switch (demo_req.mark) {
+//         case "day":
 
-            // when day
-            const everyday = getDatesInRange(demo_req.day_from, demo_req.day_to);
+//             // when day
+//             const everyday = getDatesInRange(demo_req.day_from, demo_req.day_to);
 
-            for (const day of everyday) {
-                for (const country of readyCountry) {
-                    let count = 0;
-                    for (const data of readyAllData) {
-                        if (country.country == data.country_code && day == data.date.split(' ')[0] && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version)) count++;
-                    }
+//             for (const day of everyday) {
+//                 for (const country of readyCountry) {
+//                     let count = 0;
+//                     for (const data of readyAllData) {
+//                         if (country.country == data.country_code && day == data.date.split(' ')[0] && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version)) count++;
+//                     }
 
-                    readyCountry.map(el => {
-                        if (el.country == country.country) el.data.push(count);
-                    })
-                }
-            }
+//                     readyCountry.map(el => {
+//                         if (el.country == country.country) el.data.push(count);
+//                     })
+//                 }
+//             }
 
-            const resultDay = {
-                mainData: readyCountry,
-                date: everyday
-            }
+//             const resultDay = {
+//                 mainData: readyCountry,
+//                 date: everyday
+//             }
 
-            let countryFilter = [];
-            resultDay.mainData.map(el => {
-                if (demo_req.country.includes(el.country)) countryFilter.push(el);
-            })
+//             let countryFilter = [];
+//             resultDay.mainData.map(el => {
+//                 if (demo_req.country.includes(el.country)) countryFilter.push(el);
+//             })
 
-            resultDay.mainData = countryFilter;
+//             resultDay.mainData = countryFilter;
 
-            res.json(resultDay);
+//             res.json(resultDay);
 
-            break;
+//             break;
 
-        case "month":
+//         case "month":
 
-            // when month
-            const everymonth = getMonthlyDatesInRange(demo_req.month_from, demo_req.month_to);
+//             // when month
+//             const everymonth = getMonthlyDatesInRange(demo_req.month_from, demo_req.month_to);
 
-            for (const month of everymonth) {
-                for (const country of readyCountry) {
-                    let count = 0;
-                    for (const data of readyAllData) {
-                        const isMonth = isDateInMonth(data.date, month);
-                        if (isMonth && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version) && country.country == data.country_code) count++;
-                    }
+//             for (const month of everymonth) {
+//                 for (const country of readyCountry) {
+//                     let count = 0;
+//                     for (const data of readyAllData) {
+//                         const isMonth = isDateInMonth(data.date, month);
+//                         if (isMonth && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version) && country.country == data.country_code) count++;
+//                     }
 
-                    readyCountry.map(el => {
-                        if (el.country == country.country) el.data.push(count);
-                    })
-                }
-            }
+//                     readyCountry.map(el => {
+//                         if (el.country == country.country) el.data.push(count);
+//                     })
+//                 }
+//             }
 
-            const resultMonth = {
-                mainData: readyCountry,
-                date: everymonth
-            }
+//             const resultMonth = {
+//                 mainData: readyCountry,
+//                 date: everymonth
+//             }
 
-            let countryFilter_month = [];
-            resultMonth.mainData.map(el => {
-                if (demo_req.country.includes(el.country)) countryFilter_month.push(el);
-            })
+//             let countryFilter_month = [];
+//             resultMonth.mainData.map(el => {
+//                 if (demo_req.country.includes(el.country)) countryFilter_month.push(el);
+//             })
 
-            resultMonth.mainData = countryFilter_month;
+//             resultMonth.mainData = countryFilter_month;
 
-            res.json(resultMonth);
+//             res.json(resultMonth);
 
-            break;
+//             break;
 
-        case "week":
+//         case "week":
 
-            // when week
-            const everyweek = getWeeksInRange(demo_req.week_from, demo_req.week_to);
+//             // when week
+//             const everyweek = getWeeksInRange(demo_req.week_from, demo_req.week_to);
 
-            for (const week of everyweek) {
-                for (const country of readyCountry) {
-                    let count = 0;
-                    for (const data of readyAllData) {
-                        const isWeek = isDateInISOWeek(data.date, week);
-                        if (isWeek && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version) && country.country == data.country_code) count++;
-                    }
+//             for (const week of everyweek) {
+//                 for (const country of readyCountry) {
+//                     let count = 0;
+//                     for (const data of readyAllData) {
+//                         const isWeek = isDateInISOWeek(data.date, week);
+//                         if (isWeek && data.isDownload == 'Downloaded' && demo_req.version.includes(data.version) && country.country == data.country_code) count++;
+//                     }
 
-                    readyCountry.map(el => {
-                        if (el.country == country.country) el.data.push(count);
-                    })
-                }
-            }
+//                     readyCountry.map(el => {
+//                         if (el.country == country.country) el.data.push(count);
+//                     })
+//                 }
+//             }
 
-            const resultWeek = {
-                mainData: readyCountry,
-                date: everyweek
-            }
+//             const resultWeek = {
+//                 mainData: readyCountry,
+//                 date: everyweek
+//             }
 
-            let countryFilter_week = [];
-            resultWeek.mainData.map(el => {
-                if (demo_req.country.includes(el.country)) countryFilter_week.push(el);
-            })
+//             let countryFilter_week = [];
+//             resultWeek.mainData.map(el => {
+//                 if (demo_req.country.includes(el.country)) countryFilter_week.push(el);
+//             })
 
-            resultWeek.mainData = countryFilter_week;
+//             resultWeek.mainData = countryFilter_week;
 
-            res.json(resultWeek);
+//             res.json(resultWeek);
 
-            break;
+//             break;
 
-        default:
-            break;
-    }
+//         default:
+//             break;
+//     }
 
 
-})
+// })
 
 // Asssit Function
 
@@ -564,27 +565,27 @@ app.post('/api/allCount', (req, res) => {
 
     switch (dateType) {
         case "all":
-            chartData.map(el => {
-                el.map(item => readyAllData.push(item));
+            analyzeData.map(el => {
+                el.all?.map(item => readyAllData.push(item));
             })
             break;
         case "day":
-            chartData.map(el => {
-                el.map(item => {
+            analyzeData.map(el => {
+                el.all?.map(item => {
                     if (item.date?.split(' ')[0] == day) readyAllData.push(item);
                 });
             })
             break;
         case "month":
-            chartData.map(el => {
-                el.map(item => {
+            analyzeData.map(el => {
+                el.all?.map(item => {
                     if (isDateInMonth(item.date?.split(' ')[0], month)) readyAllData.push(item);
                 });
             })
             break;
         case "week":
-            chartData.map(el => {
-                el.map(item => {
+            analyzeData.map(el => {
+                el.all?.map(item => {
                     if (isDateInISOWeek(item.date?.split(' ')[0], week)) readyAllData.push(item);
                 });
             })
@@ -628,27 +629,27 @@ app.post('/api/allVersions', (req, res) => {
 
     switch (dateType) {
         case "all":
-            chartData.map(el => {
-                el.map(item => readyAllData.push(item));
+            analyzeData.map(el => {
+                el.all?.map(item => readyAllData.push(item));
             })
             break;
         case "day":
-            chartData.map(el => {
-                el.map(item => {
+            analyzeData.map(el => {
+                el.all?.map(item => {
                     if (item.date?.split(' ')[0] == day) readyAllData.push(item);
                 });
             })
             break;
         case "month":
-            chartData.map(el => {
-                el.map(item => {
+            analyzeData.map(el => {
+                el.all?.map(item => {
                     if (isDateInMonth(item.date?.split(' ')[0], month)) readyAllData.push(item);
                 });
             })
             break;
         case "week":
-            chartData.map(el => {
-                el.map(item => {
+            analyzeData.map(el => {
+                el.all?.map(item => {
                     if (isDateInISOWeek(item.date?.split(' ')[0], week)) readyAllData.push(item);
                 });
             })
